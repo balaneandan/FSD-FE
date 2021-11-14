@@ -56,7 +56,7 @@ export const UseAxios = <T>(url: string, methodType:any, dependencyList: Array<O
           console.log(error.message);
         })
     }, Math.random() * MAXIMUM_DELAY);
-  }, [dependencyList, url,methodType, state, params]);
+  }, dependencyList);
 
   return state;
 }
