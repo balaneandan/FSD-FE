@@ -30,10 +30,10 @@ export const DevicesPage = (): JSX.Element => {
   const [showSensors, setShowSensors] = useState<boolean>(false);
 
   // -------------- sensors
-const [selectedSensorsItems, setSelectedSensorsItems] = useState<Object[] | undefined>(undefined);
-// const [selectedSensor,setSelectedSensor] = useState<ISensor>(getDefaultSensor);
-const [sensorsRows,setSensorsRows] = useState<ISensor[]>([]);
-const sensorsResponse:IAxiosResult<ISensor[]> = UseAxios(SensorsService.GET_ALL_SENSORS,'GET',[updateTable]);
+  const [selectedDeviceForSensors, setSelectedDeviceForSensors] = useState<IDevice>();
+  const [selectedSensorsItems, setSelectedSensorsItems] = useState<Object[] | undefined>(undefined);
+  const [sensorsRows,setSensorsRows] = useState<ISensor[]>([]);
+  const sensorsResponse:IAxiosResult<ISensor[]> = UseAxios(SensorsService.GET_ALL_SENSORS,'GET',[updateTable]);
 
 useEffect(() => {
   if(sensorsResponse.Data === null)
@@ -41,12 +41,31 @@ useEffect(() => {
     setSensorsRows(sensorsResponse.Data);
 },[sensorsResponse])
 
+// assigned sensors --------------
+const [selectedAttachedSensorsItems, setSelectedAttachedSensorsItems] = useState<Object[] | undefined>(undefined);
+const [sensorsAttachedRows,setSensorsAttachedRows] = useState<ISensor[]>([]);
+const sensorsAttachedResponse:IAxiosResult<ISensor[]> = UseAxios(SensorsService.GET_SENSORS_BY_DEVICE_ID+selectedDeviceForSensors?.id,'GET',[selectedDeviceForSensors]);
+
+
+useEffect(() => {
+  if(sensorsAttachedResponse.Data === null)
+    return;
+    setSensorsAttachedRows(sensorsAttachedResponse.Data);
+},[sensorsAttachedResponse])
+
+
 useEffect(() => {
   if(response.Data === null)
     return;
     console.log(response.Data)
     setRows(response.Data);
 },[response])
+
+const [selectionAttachedSensors] = useState<Selection>(() => new Selection({
+  onSelectionChanged: () => {
+    setSelectedAttachedSensorsItems(selectionAttachedSensors.getSelection());
+  }
+}));
 
 const [selectionSensors] = useState<Selection>(() => new Selection({
     onSelectionChanged: () => {
@@ -56,6 +75,10 @@ const [selectionSensors] = useState<Selection>(() => new Selection({
 
 const getSelectedSensorsItem = (): IObjectWithKey => {
     return selectedSensorsItems[0];
+};
+
+const getSelectedAttachedSensorsItem = (): IObjectWithKey => {
+  return selectedAttachedSensorsItems[0];
 };
 
 const columnsSensors:IColumn[] = [
@@ -171,16 +194,52 @@ const columnsSensors:IColumn[] = [
   };
 
     const handleShowSensors = () => {
-        setShowSensors(!showSensors);
+      if(selectedItems === undefined )
+        return;
+      const itemToView = JSON.stringify(getSelectedItem());
+      let device: IDevice = JSON.parse(itemToView);
+      setSelectedDeviceForSensors(device);
+      console.log(device);
+      setShowSensors(!showSensors);
     }
 
     // sensors ----------------------------
     const handleAttach = () => {
-      if(selectedSensorsItems === undefined )
+      if(selectedSensorsItems === undefined || selectedItems === undefined)
         return;
+
+      const itemToView2 = JSON.stringify(getSelectedItem());
+      let device: IDevice = JSON.parse(itemToView2);
       const itemToView = JSON.stringify(getSelectedSensorsItem());
       let sensor: ISensor = JSON.parse(itemToView);
       console.log(sensor);
+      axios(config(SensorsService.ADD_DEVICE_BY_SENSOR_ID+sensor.id,'POST', device ))
+      .then((_) => {
+        setUpdateTable(updateTable.split("").reverse().join(""));
+        handleShowSensors()
+        setShowSensors(true);
+        console.log("attached")
+      })
+      .catch((_) => {
+      });
+    }
+
+    const handleDetach = () => {
+      
+      if(selectedAttachedSensorsItems === undefined )
+        return;
+      const itemToView = JSON.stringify(getSelectedAttachedSensorsItem());
+      let sensor: ISensor = JSON.parse(itemToView);
+      console.log(sensor);
+
+      axios(config(SensorsService.REMOVE_DEVICE_BY_SENSOR_ID+sensor.id,'POST'))
+      .then((_) => {
+        handleShowSensors()
+        setShowSensors(true);
+        console.log("detach")
+      })
+      .catch((_) => {
+      });
     }
     return (
     <div>
@@ -261,6 +320,24 @@ const columnsSensors:IColumn[] = [
               Sensors
             </StackItem>
             <StackItem>
+              Attached Sensors
+            <ShimmeredDetailsList
+                        
+                        items={sensorsAttachedRows}
+                        columns={columnsSensors}
+                        setKey="set"
+                        selectionMode={SelectionMode.single}
+                        layoutMode={DetailsListLayoutMode.justified}
+                        selection={selectionAttachedSensors}
+                        selectionPreservedOnEmptyClick={true}
+                        enableShimmer={false}
+                    />
+            </StackItem>
+            <StackItem>
+            <Button onClick={handleDetach}>Detach sensor</Button>
+            </StackItem>
+            <StackItem>
+              Available sensors
             <ShimmeredDetailsList
                         
                         items={sensorsRows}

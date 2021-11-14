@@ -20,5 +20,8 @@ export namespace DevicesService {
 export namespace SensorsService {
   export const DELETE_SENSOR_BY_ID = `${baseUrl}${"sensor/delete/"}`;
   export const ADD_SENSOR = `${baseUrl}${"sensor/insert/"}`;
+  export const GET_SENSORS_BY_DEVICE_ID = `${baseUrl}${"sensor/GetSensorsByDeviceId"}`;
+  export const ADD_DEVICE_BY_SENSOR_ID = `${baseUrl}${"sensor/"}`;
+  export const REMOVE_DEVICE_BY_SENSOR_ID = `${baseUrl}${"sensor/"}`;
   export const GET_ALL_SENSORS = `${baseUrl}${"sensor/"}`;
 }
