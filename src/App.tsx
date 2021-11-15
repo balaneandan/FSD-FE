@@ -92,7 +92,7 @@ const App = () => {
           <DeniedAccessPage/>
         </>
         }
-        {user?.isAdmin === true ? <Route exact path="/admin" component={Clients} /> : <div>Denied</div>}
+        {user?.admin === true ? <Route exact path="/admin" component={Clients} /> : <div>Denied</div>}
         
       </Switch>
     </AuthenticationContext.Provider>

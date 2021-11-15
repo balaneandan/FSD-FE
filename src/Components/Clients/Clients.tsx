@@ -16,7 +16,7 @@ const getDefaultClient = (): IClient => (
     password:"",
     address:"",
     age:19,
-    isAdmin:false
+    admin:false
   } );
 
 export const Clients = () => {

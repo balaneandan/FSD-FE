@@ -5,5 +5,5 @@ export interface IClient {
     password: string;
     address: string;
     age: number;
-    isAdmin: boolean;
+    admin: boolean;
 }
