@@ -55,7 +55,7 @@ export const  SwipeableTemporaryDrawer = () => {
         <Button onClick={() => authenticationService.logoutUser()}>Log out</Button>
         <React.Fragment key={anchor}>
           
-          <Button onClick={toggleDrawer(anchor, true)}>{anchor}</Button>
+          <Button onClick={toggleDrawer(anchor, true)}>MENU</Button>
           <SwipeableDrawer
             anchor={anchor}
             open={state[anchor]}
